@@ -22,12 +22,12 @@ library(lme4)
 #library(nlme)
 
 root_dir = '/home/gubian/Experiments/FDA/lana/' # your root dir
-plots_dir = paste(root_dir,'plots/',sep='')
-data_dir =  paste(root_dir,'data/',sep='')
-scripts_dir =  paste(root_dir,'scripts/',sep='')
+plots_dir = file.path(root_dir,'plots/')
+data_dir =  file.path(root_dir,'data/')
+scripts_dir =  file.path(root_dir,'scripts/')
 
 
-DH_data = read.csv(file = paste(data_dir,"DH_data_FDA.csv",sep=''))
+DH_data = read.csv(file = file.path(data_dir,"DH_data_FDA.csv"))
 speakers = levels(DH_data$spk)
 
 
@@ -141,7 +141,7 @@ library(lme4)
 
 # plot speaker-specific coefficients
 vdur_class_1classspk.coef = coef(vdur_class_1classspk.lmer)
-png(paste(plots_dir,'vdur_class_1classspk_coef.png',sep=''))
+png(file.path(plots_dir,'vdur_class_1classspk_coef.png'))
 par(mar=c(5.1,6.6,2.1,2.1),mgp = c(4, 1, 0))
 plot(vdur_class_1classspk.coef$spk,type='n',las=1,xlab=expression(beta[0] + u[{list(0,j)}]),ylab=expression(beta[1] + u[{list(1,j)}]),cex.lab=2.5,cex.axis=1.8)
 for (spk in speakers) {
@@ -152,7 +152,7 @@ dev.off()
 
 # boxplot of vdur and by-speaker predicted models
 
-png(paste(plots_dir,'vdur_spk_box.png',sep=''))
+png(file.path(plots_dir,'vdur_spk_box.png'))
 bwp = bwplot( vdur ~ class | spk, data = DH_data,  ylab = 'vowel seq duration (ms)',
             panel = function(...,subscripts) { # see (Baayen, 2008)
                 panel.bwplot(...)
@@ -238,7 +238,7 @@ library(lme4)
 
 # plot speaker-specific coefficients
 f0_s1_class_1classspk.coef = coef(f0_s1_class_1classspk.lmer)
-png(paste(plots_dir,'f0_s1_class_1classspk_coef.png',sep=''))
+png(file.path(plots_dir,'f0_s1_class_1classspk_coef.png'))
 par(mar=c(5.1,6.6,2.1,2.1),mgp = c(4, 1, 0))
 plot(f0_s1_class_1classspk.coef$spk,type='n',las=1,xlab=expression(beta[0] + u[{list(0,j)}]),ylab=expression(beta[1] + u[{list(1,j)}]),cex.lab=2.5,cex.axis=1.8)
 for (spk in speakers) {
@@ -250,7 +250,7 @@ dev.off()
 
 # boxplot of f0_s1 and by-speaker predicted models
 
-png(paste(plots_dir,'f0_s1_spk_box.png',sep=''))
+png(file.path(plots_dir,'f0_s1_spk_box.png'))
 bwp = bwplot( f0_s1 ~ class | spk, data = DH_data,  ylab = expression(s[1]^{f[0]}),
             panel = function(...,subscripts) { # see (Baayen, 2008)
                 panel.bwplot(...)
@@ -283,7 +283,7 @@ for (i in 1:nrow(table_plot)) {
     curves[,i] = eval.fd(t_f0,curve)
 }
 
-png(paste(plots_dir,'f0_s1_class_1classspk_curves.png',sep=''))
+png(file.path(plots_dir,'f0_s1_class_1classspk_curves.png'))
 xyp =	xyplot(
 	ts(data=curves,start=t_f0[1],deltat=t_f0[2]-t_f0[1]),
 	screens=table_plot$spk,
@@ -383,7 +383,7 @@ detach("package:nlme")
 library(lme4)
 
 f0_s2_class_1classspk.coef = coef(f0_s2_class_1classspk.lmer)
-png(paste(plots_dir,'f0_s2_class_1classspk_coef.png',sep=''))
+png(file.path(plots_dir,'f0_s2_class_1classspk_coef.png'))
 par(mar=c(5.1,6.6,2.1,2.1),mgp = c(4, 1, 0))
 plot(f0_s2_class_1classspk.coef$spk,type='n',las=1,xlab=expression(beta[0] + u[{list(0,j)}]),ylab=expression(beta[1] + u[{list(1,j)}]),cex.lab=2.5,cex.axis=1.8)
 for (spk in speakers) {
@@ -395,7 +395,7 @@ dev.off()
 
 # boxplot of f0_s2 and by-speaker predicted models
 
-png(paste(plots_dir,'f0_s2_spk_box.png',sep=''))
+png(file.path(plots_dir,'f0_s2_spk_box.png'))
 bwp = bwplot( f0_s2 ~ class | spk, data = DH_data,  ylab = expression(s[2]^{f[0]}),
             panel = function(...,subscripts) { # see (Baayen, 2008)
                 panel.bwplot(...)
@@ -428,7 +428,7 @@ for (i in 1:nrow(table_plot)) {
     curves[,i] = eval.fd(t_f0,curve)
 }
 
-png(paste(plots_dir,'f0_s2_class_1classspk_curves.png',sep=''))
+png(file.path(plots_dir,'f0_s2_class_1classspk_curves.png'))
 xyp =	xyplot(
 	ts(data=curves,start=t_f0[1],deltat=t_f0[2]-t_f0[1]),
 	screens=table_plot$spk,
@@ -533,7 +533,7 @@ library(lme4)
 
 # plot speaker-specific coefficients
 F12_s1_class_1classspk.coef = coef(F12_s1_class_1classspk.lmer)
-png(paste(plots_dir,'F12_s1_class_1classspk_coef.png',sep=''))
+png(file.path(plots_dir,'F12_s1_class_1classspk_coef.png'))
 par(mar=c(5.1,6.6,2.1,2.1),mgp = c(4, 1, 0))
 plot(F12_s1_class_1classspk.coef$spk,type='n',las=1,xlab=expression(beta[0] + u[{list(0,j)}]),ylab=expression(beta[1] + u[{list(1,j)}]),cex.lab=1.5,cex.lab=2.5,cex.axis=1.8)
 for (spk in speakers) {
@@ -546,7 +546,7 @@ dev.off()
 
 # boxplot of F12_s1 and by-speaker predicted models
 
-png(paste(plots_dir,'F12_s1_spk_box.png',sep=''))
+png(file.path(plots_dir,'F12_s1_spk_box.png'))
 bwp = bwplot( F12_s1 ~ class | spk, data = DH_data,  ylab = expression(s[1]^{F[1-2]}),
             panel = function(...,subscripts) { # see (Baayen, 2008)
                 panel.bwplot(...)
@@ -592,7 +592,7 @@ for (i in 1:nrow(table_plot_F12)) {
      curves_F12[,i] = eval.fd(t_F12,curve)
 }
 
-png(paste(plots_dir,'F12_s1_class_1classspk_curves.png',sep=''))
+png(file.path(plots_dir,'F12_s1_class_1classspk_curves.png'))
 xyp =	xyplot(
 	ts(data=curves_F12,start=t_F12[1],deltat=t_F12[2]-t_F12[1]),
 	screens=with( table_plot_F12, paste(spk,', F',F12,sep='')),
@@ -689,7 +689,7 @@ library(lme4)
 
 # plot speaker-specific coefficients
 F12_s2_class_1classspk.coef = coef(F12_s2_class_1classspk.lmer)
-png(paste(plots_dir,'F12_s2_class_1classspk_coef.png',sep=''))
+png(file.path(plots_dir,'F12_s2_class_1classspk_coef.png'))
 par(mar=c(5.1,6.6,2.1,2.1),mgp = c(4, 1, 0))
 plot(F12_s2_class_1classspk.coef$spk,type='n',las=1,xlab=expression(beta[0] + u[{list(0,j)}]),ylab=expression(beta[1] + u[{list(1,j)}]),cex.lab=2.5,cex.axis=1.8)
 for (spk in speakers) {
@@ -702,7 +702,7 @@ dev.off()
 
 # boxplot of F12_s2 and by-speaker predicted models
 
-png(paste(plots_dir,'F12_s2_spk_box.png',sep=''))
+png(file.path(plots_dir,'F12_s2_spk_box.png'))
 bwp = bwplot( F12_s2 ~ class | spk, data = DH_data,  ylab = expression(s[2]^{F[1-2]}),
             panel = function(...,subscripts) { # see (Baayen, 2008)
                 panel.bwplot(...)
@@ -747,7 +747,7 @@ for (i in 1:nrow(table_plot_F12)) {
      curves_F12[,i] = eval.fd(t_F12,curve)
 }
 
-png(paste(plots_dir,'F12_s2_class_1classspk_curves.png',sep=''))
+png(file.path(plots_dir,'F12_s2_class_1classspk_curves.png'))
 xyp =	xyplot(
 	ts(data=curves_F12,start=t_F12[1],deltat=t_F12[2]-t_F12[1]),
 	screens=with( table_plot_F12, paste(spk,', F',F12,sep='')),
@@ -801,7 +801,7 @@ grid = expand.grid( vdur_CS     = do.breaks(c(-3,3),60),
                     F12_s1_CS   = do.breaks(c(-3,3),60))
 lp = list() # contains levelplots
 
-png(paste(plots_dir,'prob_vdur_CS_F12_s1_CS_speakers.png',sep=''))
+png(file.path(plots_dir,'prob_vdur_CS_F12_s1_CS_speakers.png'))
 for (spk in speakers) {
     # build the speaker-specific glmm predicting function
     grid$logit =   with(grid, 

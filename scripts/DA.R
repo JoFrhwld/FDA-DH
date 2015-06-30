@@ -21,12 +21,12 @@ library(fda)
 library(lattice)
 
 root_dir = '/home/gubian/Experiments/FDA/lana/' # your root dir
-plots_dir = paste(root_dir,'plots/',sep='')
-data_dir =  paste(root_dir,'data/',sep='')
-scripts_dir =  paste(root_dir,'scripts/',sep='')
+plots_dir = file.path(root_dir,'plots/')
+data_dir =  file.path(root_dir,'data/')
+scripts_dir =  file.path(root_dir,'scripts/')
 
 
-DH_data = read.csv(file = paste(data_dir,"DH_data_FDA.csv",sep=''))
+DH_data = read.csv(file = file.path(data_dir,"DH_data_FDA.csv"))
 speakers = levels(DH_data$spk)
 
 ################## Analysis of features one by one ########################
@@ -122,7 +122,7 @@ feature_class.p.adjust = cbind(speakers,feature_class.p.adjust)
 
 # correlation among (vdur, f0_s2, F12_s1)
 library(Hmisc)
-png(paste(plots_dir,'correlation_tree.png',sep=''))
+png(file.path(plots_dir,'correlation_tree.png',))
 plot(varclus(as.matrix(DH_data[,c('vdur','f0_s2','F12_s1')])),cex = 1.3) # ,labels=c('d',expression(s[2]^{f[0]}),expression(s[1]^{F[1-2]})) unfortunately expressions are not supported by plot.varclus
 dev.off()
 varclus(as.matrix(DH_data[,c('vdur','f0_s2','F12_s1')]))
@@ -182,7 +182,7 @@ DH_data$F12_s1_CS = scale(DH_data$F12_s1)
 DH_data$F12_s2_CS = scale(DH_data$F12_s2) 
 
 # scatterplot of centered and scaled vdur and F12_s1, by speaker
-png(paste(plots_dir,'scatter_F12_s1_CS_vdur_CS_speaker.png',sep=''))
+png(file.path(plots_dir,'scatter_F12_s1_CS_vdur_CS_speaker.png'))
 xyp = xyplot(F12_s1_CS ~ vdur_CS | spk,  data = DH_data,xlab = 'norm. d',ylab=expression(paste('norm.',s[1]^{F[1-2]})), groups= class, 
 pch  = sapply(levels(DH_data$class), function(x) symbol[[x]],USE.NAMES = FALSE),
 col =  sapply(levels(DH_data$class), function(x) color[[x]],USE.NAMES = FALSE),
@@ -205,7 +205,7 @@ update	(xyp, par.settings=list(
 dev.off()
 
 # scatterplot of centered and scaled vdur and F12_s1, global
-png(paste(plots_dir,'scatter_F12_s1_CS_vdur_CS.png',sep=''))
+png(file.path(plots_dir,'scatter_F12_s1_CS_vdur_CS.png'))
 xyp = xyplot(F12_s1_CS ~ vdur_CS,  data = DH_data,xlab = 'norm. d',ylab=expression(paste('norm.',s[1]^{F[1-2]})), groups= class, 
 pch  = sapply(levels(DH_data$class), function(x) symbol[[x]],USE.NAMES = FALSE),
 col =  sapply(levels(DH_data$class), function(x) color[[x]],USE.NAMES = FALSE),
@@ -237,7 +237,7 @@ grid$logit =   with(grid,
     )
 grid$prob = with(grid, 1/(1 + exp(-logit)) ) # inverse logit
 
-png(paste(plots_dir,'prob_vdur_CS_F12_s1_CS.png',sep=''))
+png(file.path(plots_dir,'prob_vdur_CS_F12_s1_CS.png'))
 levelplot(prob~vdur_CS*F12_s1_CS,data=grid,at = do.breaks(c(0,1), 30), col.regions = cRP,
     panel = function(...) {
     panel.levelplot(...)
@@ -266,7 +266,7 @@ library(party)
 ct  = list()
 for (spk in speakers) {
     ct[[spk]] = ctree(class ~  vdur + f0_s2 + F12_s1, data = DH_data[which(DH_data$spk == spk),])
-    #png(paste(plots_dir,'ctree_vdur_f0_s2_F12_s1_',spk,'.png',sep=''))
+    #png(file.path(plots_dir,'ctree_vdur_f0_s2_F12_s1_',spk,'.png'))
     #plot( ct[[spk]] )
     #dev.off()
     print (paste( spk, sum( DH_data$class[which(DH_data$spk == spk)] !=  Predict(ct[[spk]]) ), length(Predict(ct[[spk]])) ,   
@@ -278,7 +278,7 @@ for (spk in speakers) {
 ct5 = list()
 for (spk in speakers) {
     ct5[[spk]] = ctree(class ~  vdur + f0_s1 + f0_s2 + F12_s1 + F12_s2, data = DH_data[which(DH_data$spk == spk),])
-    png(paste(plots_dir,'ctree_all5_',spk,'.png',sep=''))
+    png(file.path(plots_dir,'ctree_all5_',spk,'.png'))
     plot( ct5[[spk]] )
     dev.off()
     print (paste( spk, sum( DH_data$class[which(DH_data$spk == spk)] !=  Predict(ct5[[spk]]) ), length(Predict(ct[[spk]])) ,   
@@ -290,7 +290,7 @@ for (spk in speakers) {
 # global tree for all speakers
 CT =  ctree(class ~  vdur + f0_s2 + F12_s1 , data = DH_data)
 
-png(paste(plots_dir,'ctree_vdur_f0_s2_F12_s1_all_speakers.png',sep=''))
+png(file.path(plots_dir,'ctree_vdur_f0_s2_F12_s1_all_speakers.png'))
 plot(CT)
 dev.off()
 print (paste( 'all speakers' , sum( DH_data$class !=  Predict(CT) ), length(Predict(CT)) ,   

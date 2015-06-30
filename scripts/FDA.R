@@ -22,21 +22,21 @@ library(fda)
 library(lattice)
 
 root_dir = '/home/gubian/Experiments/FDA/lana/' # root dir for this experiment, change it.
-plots_dir = paste(root_dir,'plots/',sep='')
-data_dir =  paste(root_dir,'data/',sep='')
-scripts_dir =  paste(root_dir,'scripts/',sep='')
+plots_dir = file.path(root_dir,'plots/')
+data_dir =  file.path(root_dir,'data/')
+scripts_dir =  file.path(root_dir,'scripts/')
 
 # use pca.fd version from package fda_2.2.5.tar.gz or earlier (you find a copy in the scripts/ dir)
-source(paste(scripts_dir,'pca.fd.R',sep=''))
+source(file.path(scripts_dir,'pca.fd.R'))
 # this is a modified version of the landmarkreg() command 
-source(paste(scripts_dir,'landmarkreg.nocurve.R',sep=''))
+source(file.path(scripts_dir,'landmarkreg.nocurve.R'))
 # this is a slightly modified version of the plot.pca.fd() command,
 # but you can also use the standard one.
-source(paste(scripts_dir,'plot.pca.fd.corr.R',sep=''))
+source(file.path(scripts_dir,'plot.pca.fd.corr.R'))
 
 
 # filename, speaker, class, durations ('DH' stands for diphthong-hiatus) 
-DH_data = read.csv(file = paste(data_dir,"DH_data.csv",sep=''))
+DH_data = read.csv(file = file.path(data_dir,"DH_data.csv"))
 n_items = dim(DH_data)[1] # 365
 speakers = levels(DH_data$spk) # "AM" "CC" "CP" "CT" "FM" "MC" "MM" "MS" "NM"
 
@@ -58,7 +58,7 @@ vowel_time = list() # for formants
 vowel_time0 = list() # starting from 0
 
 for (i in 1:n_items) {
-    data_sample = read.table(paste(data_dir,'pitch_and_formants/',DH_data$filename[i],".pitch",sep=''),h=T)
+    data_sample = read.table(file.path(data_dir,'pitch_and_formants/',DH_data$filename[i],".pitch"),h=T)
     time_list[[i]] = data_sample$time[7:length(data_sample$time)] 
     time_list[[i]][1] = 0 # correct possible approx errors
     len_f0 = c(len_f0, length( data_sample$time) - 6) # get rid of the first 6 samples
@@ -97,8 +97,8 @@ strip.background.col = trellis.par.get('strip.background')$col[4]; dev.off() # m
 
 subsamp= runif(n_items) < 0.2 # randomly select 20% of the dataset
 # two versions, separated by class or not. Uncomment accordingly.
-png(paste(plots_dir,'f0_raw.png',sep=''))
-#png(paste(plots_dir,'f0_raw_nocol.png',sep=''))
+png(file.path(plots_dir,'f0_raw.png'))
+#png(file.path(plots_dir,'f0_raw_nocol.png'))
 i=1
 plot(time_list[[i]],f0_list[[i]],type = 'n',xlim=c(0,400),ylim=c(-4,6),xlab='time (ms)',ylab='F0 (norm. semitones)',las=1,main = '',cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
@@ -114,7 +114,7 @@ dev.off()
 for (spk in c('CC','MM')) {
     for (class in c('d','h')) {
         index = which(DH_data$spk == spk & DH_data$class == class)
-        png(paste(plots_dir,'f0_raw_',spk,'_',class,'.png',sep=''))
+        png(file.path(plots_dir,'f0_raw_',spk,'_',class,'.png'))
         plot(time_list[[index[1]]],f0_list[[index[1]]],type = 'n',xlim=c(0,400),ylim=c(-6,6),xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
         for (i in index) { 
 	        lines(time_list[[i]],f0_list[[i]],col = 1)
@@ -156,7 +156,7 @@ for (k in 1:length(n_knots_vec)) {
 gcv_log_err = log( apply(gcv_err,2:3,median, na.rm=T)) # median to protect from outliers
 
 # plot log GCV errors on a grid
-png(paste(plots_dir,'GCV_log_err_f0.png',sep='')) 
+png(file.path(plots_dir,'GCV_log_err_f0.png')) 
 col.l <- colorRampPalette(c('blue', 'white'))(30)
 levelplot( gcv_log_err, scales=list(y=list(at=1:length(n_knots_vec),labels=n_knots_vec,cex=1.5), x=list(at=1:length(loglam_vec),labels=sapply(loglam_vec,function(x) eval(substitute(expression(10^y) ,list(y=x)) )),cex=1.5) ),xlab = list(label = expression(lambda), cex=2), ylab = list(label= 'k',cex=2),col.regions=col.l,
 colorkey=list(label=list(at=-6:-3,label=sapply(-6:-3,function(x) eval(substitute(expression(10^y) ,list(y=x)) )),cex=1.5)),
@@ -192,7 +192,7 @@ for (loglam in c(-4,2,6,10)) {
 		i=150 # select here a random curve
 		t_norm = (time_list[[i]] / dur_f0[i]) * mean_dur_f0
 		y_fd = smooth.basis(t_norm,f0_list[[i]],fdPar)$fd
-		png(paste(plots_dir,'f0_fit_loglam',loglam,'n_knots',n_knots,'.png',sep=''))
+		png(file.path(plots_dir,'f0_fit_loglam',loglam,'n_knots',n_knots,'.png'))
 		plot(y_fd,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='red',lwd=3,ylim=c(-3,5))
 		points(t_norm,f0_list[[i]],pch=20)
 		#legend('topleft',legend= c(eval(substitute(expression(lambda == 10^x),list(x = loglam))),eval(substitute(expression(k == x),list(x = n_knots))) ),cex=2  )
@@ -241,13 +241,13 @@ nbasis <- length(knots) + norder - 2
 basis_i <- create.bspline.basis(rng_i, nbasis, norder, knots)
 fdPar_i <- fdPar(basis_i, Lfdobj,lambda)
 y_fd = smooth.basis(time_list[[i]],f0_list[[i]],fdPar_i)$fd
-png(paste(plots_dir,'f0_orig_time_loglam',loglam,'n_knots',n_knots,'.png',sep=''))
+png(file.path(plots_dir,'f0_orig_time_loglam',loglam,'n_knots',n_knots,'.png'))
 plot(y_fd,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='red',lwd=3,ylim=c(-3,5))
 legend('topleft',legend= c(eval(substitute(expression(lambda == 10^x),list(x = loglam))),eval(substitute(expression(k == x),list(x = n_knots))) ),cex=2  )
 dev.off()
 # plot first derivative (note: time axis is in ms, should convert to s in order to get st/s on the y axis).
 # y(t), t in ms. If T in s, then t = 1000*T. dy(1000*T)/dT = 1000* dy(T)/dT = 1000* dy(t)/dt 
-png(paste(plots_dir,'Df0_orig_time_loglam',loglam,'n_knots',n_knots,'.png',sep=''))
+png(file.path(plots_dir,'Df0_orig_time_loglam',loglam,'n_knots',n_knots,'.png'))
 plot(1000*y_fd,Lfdobj=1,xlab='time (ms)',ylab='st/s',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='red',lwd=3)
 legend('bottomright',legend= c(eval(substitute(expression(lambda == 10^x),list(x = loglam))),eval(substitute(expression(k == x),list(x = n_knots))) ),cex=2  )
 dev.off()
@@ -279,8 +279,8 @@ f0_fd = fd(coef=f0_coefs, basisobj=basis)
 # curves are linearly time normalized, their duration is mean_dur_f0
 
 # plot the curves
-png(paste(plots_dir,'f0_lin.png',sep=''))
-#png(paste(plots_dir,'f0_lin_nocol.png',sep=''))
+png(file.path(plots_dir,'f0_lin.png'))
+#png(file.path(plots_dir,'f0_lin_nocol.png'))
 plot(c(0,mean_dur_f0),c(-4,6),type='n',xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
     #lines(f0_fd[i],col = 'black', lty=1,lwd=1)
@@ -292,7 +292,7 @@ dev.off()
 
 # this is how the B-spline basis looks
 basis_fd = fd(diag(1,nbasis),basis)
-png(paste(plots_dir,'B-splines.png',sep=''))
+png(file.path(plots_dir,'B-splines.png'))
 plot(norm_rng,c(0,1),type='n',xlab='time (s)', ylab = '', las=1,cex.axis=1.3,cex.lab=1.3)
 for (b in 1:nbasis) {
     lines(basis_fd[b],col='red',lty=2)
@@ -307,7 +307,7 @@ t_norm = seq(0,mean_dur_f0,length.out = length(f0_list[[i]]))
 y = f0_list[[i]]
 y_fd = smooth.basis(t_norm,y,fdPar)$fd
 # this is how the splines combine (sum) to approximate the given curve samples
-png(paste(plots_dir,'B-splines_smoothing.png',sep=''))
+png(file.path(plots_dir,'B-splines_smoothing.png'))
 plot(y_fd,lwd=2,col='red',xlab='time (s)', ylab = 'norm. st', las=1,cex.axis=1.3,cex.lab=1.3)
 points(t_norm,y,pch=20,col='black')
 for (b in 1:nbasis) {
@@ -356,8 +356,8 @@ for (i in 1:(length(reg$land)-1)) {
     at_land = c(at_land, mean(reg$land[i:(i+1)]))
 }
 
-#png(paste(plots_dir,'f0_reg.png',sep=''))
-png(paste(plots_dir,'f0_reg_nocol.png',sep=''))
+#png(file.path(plots_dir,'f0_reg.png'))
+png(file.path(plots_dir,'f0_reg_nocol.png'))
 plot(c(0,mean_dur_f0),c(-4,6),type='n',xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
     lines(f0reg_fd[i],col = 'black', lty=1,lwd=1)
@@ -391,7 +391,7 @@ for (i in 1:n_items) {
 subsamp_small= (1:n_items)[runif(n_items) < 0.02] # select 2% of the dataset
 
 # plot h(t) for some curves, show alignment 
-png(paste(plots_dir,'h_sample.png',sep=''))
+png(file.path(plots_dir,'h_sample.png'))
 plot(reg$warpfd[subsamp_small],lty=1,lwd=1,las=1,xlab='reg. time (ms)',ylab='lin. norm. time (ms)',cex.axis=1.3,cex.lab=1.3,col='black')
 for (i in subsamp_small) {
 points(eval.fd(land[i,2],h_inv_list[[i]]),land[i,2],col='red',pch=19,cex=1)
@@ -402,7 +402,7 @@ dev.off()
 
 
 # plot some linearly registered curves, show landmark position
-png(paste(plots_dir,'registration_lin.png',sep=''))
+png(file.path(plots_dir,'registration_lin.png'))
 plot(range(reg$land),c(-4,6),type='n',xlab='lin. norm. time (ms)',ylab='F0 (norm. semitones)',las=1,ylim=c(-4,6),cex.lab=1.3,cex.axis=1.3)
 for (i in subsamp_small) {
     lines(f0_fd[i],lty=1,col=1)
@@ -411,7 +411,7 @@ for (i in subsamp_small) {
 }
 dev.off()
 # plot the same curves after registration
-png(paste(plots_dir,'registration_land.png',sep=''))
+png(file.path(plots_dir,'registration_land.png'))
 plot(range(reg$land),c(-4,6),type='n',xlab='reg. time (ms)',ylab='F0 (norm. semitones)',las=1,ylim=c(-4,6),cex.lab=1.3,cex.axis=1.3) 
 for (i in subsamp_small) {
     lines(f0reg_fd[i],lty=1,col=1)
@@ -443,7 +443,7 @@ f0_pcafd$scores[,2] = - f0_pcafd$scores[,2]
 plot.pca.fd.corr(f0_pcafd,xlab = 'time (ms)',ylab='F0 (norm. semitones)',land = reg$land , nx=40,plots_dir = plots_dir, basename = 'PCA_f0reg_',height=480)
 
 # plot PC scores 
-png(paste(plots_dir,'PCsplom_f0reg.png',sep=''))
+png(file.path(plots_dir,'PCsplom_f0reg.png'))
 splom(f0_pcafd$scores ,
 groups=DH_data$class,
 # in lattice plot functions, the following complex sapply() expression is necessary
@@ -455,7 +455,7 @@ dev.off()
 
 # plot only the first two PC scores
 # grouped by class
-png(paste(plots_dir,'PCscatter_f0reg.png',sep=''))
+png(file.path(plots_dir,'PCscatter_f0reg.png'))
 xyplot(f0_pcafd$scores[,2] ~  f0_pcafd$scores[,1] , cex=1.5,
 xlab = list(label=expression(s[1]),cex=2), ylab= list(label=expression(s[2]),cex=2), 
  groups= DH_data$class,
@@ -466,7 +466,7 @@ col  = sapply(levels(DH_data$class), function(x) color[[x]],USE.NAMES = FALSE),
 dev.off()
 
 # the original PCA output, i.e. no classes
-png(paste(plots_dir,'PCscatter_f0reg_allblack.png',sep=''))
+png(file.path(plots_dir,'PCscatter_f0reg_allblack.png'))
 xyplot(f0_pcafd$scores[,2] ~  f0_pcafd$scores[,1] , cex=1,
 xlab = list(label=expression(s[1]),cex=2), ylab= list(label=expression(s[2]),cex=2), 
 col  = 'black',pch=20,scales = list(cex=1.5)
@@ -475,7 +475,7 @@ dev.off()
 
 # PC scores by class and speaker
 # see http://tolstoy.newcastle.edu.au/R/e2/help/07/09/24852.html for the use of panel 
-png(paste(plots_dir,'PCscatter_f0reg_speaker.png',sep=''))
+png(file.path(plots_dir,'PCscatter_f0reg_speaker.png'))
 xyp = xyplot(f0_pcafd$scores[,2] ~  f0_pcafd$scores[,1] | DH_data$spk , groups= DH_data$class,
 xlab = list(label=expression(s[1]),cex=1.5), ylab= list(label=expression(s[2]),cex=1.5),cex=1,
 	col = sapply(levels(DH_data$class), function(x) color[[x]],USE.NAMES = FALSE),
@@ -499,7 +499,7 @@ dev.off()
 # boxplots for PC scores 
 # (manually put s1 or s2, scores[,1 or 2] and s[1] or s[2] accordingly)
 
-png(paste(plots_dir,'s1_f0reg_spk_box.png',sep=''))
+png(file.path(plots_dir,'s1_f0reg_spk_box.png'))
 bwp = bwplot(  f0_pcafd$scores[,1] ~ DH_data$class | DH_data$spk, ylab = expression(s[1]))
 update	(bwp, par.settings=list(
 	        par.xlab.text = list(cex=1.3),
@@ -517,8 +517,8 @@ dev.off()
 t_f0 = reg$x
 f0_pcafd = f0_pcafd 
 
-#png(paste(plots_dir,'f0_mean.png',sep=''))
-png(paste(plots_dir,'f0_lm_f0_s2.png',sep=''))
+#png(file.path(plots_dir,'f0_mean.png'))
+png(file.path(plots_dir,'f0_lm_f0_s2.png'))
 plot(c(0,mean_dur_f0),c(-3,5),type='n',xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 #for (class in names(color)) {
 #    lines(f0_pcafd$meanfd + mean(f0_pcafd$scores[which(DH_data$class == class),1]) * f0_pcafd$harmonics[1] + mean(f0_pcafd$scores[which(DH_data$class == class),2]) * f0_pcafd$harmonics[2],col = color[[class]], lwd = lwd[[class]], lty = lty[[class]])
@@ -535,7 +535,7 @@ dev.off()
 
 # plot class- and speaker-specific mean curves
 # see xyplot.ts
-png(paste(plots_dir,'s2_f0_mean_spk.png',sep=''))
+png(file.path(plots_dir,'s2_f0_mean_spk.png'))
 table_plot = expand.grid(class = c('d','h'),spk = speakers,stringsAsFactors = FALSE)
 
 curves = matrix(nrow = length(t_f0),ncol = nrow(table_plot))
@@ -594,28 +594,28 @@ DH_data_FDA$f0_s2 = f0_pcafd$scores[,2]
 
 ## FPCA-based reconstruction example (6 plots)
 
-png(paste(plots_dir,'mean','.png',sep=''))
+png(file.path(plots_dir,'mean','.png'))
 plot(f0_pcafd$meanfd,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,ylim=c(-4,5))
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
 axis(3,tick=F,at=at_land, labels=landlab,cex.axis=1.5)
 dev.off()
 
 
-png(paste(plots_dir,'PC1','.png',sep=''))
+png(file.path(plots_dir,'PC1','.png'))
 plot(f0_pcafd$harmonics[1],xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,)
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
 axis(3,tick=F,at=at_land, labels=landlab,cex.axis=1.5)
 dev.off()
 
 
-png(paste(plots_dir,'PC2','.png',sep=''))
+png(file.path(plots_dir,'PC2','.png'))
 plot(f0_pcafd$harmonics[2],xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,)
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
 axis(3,tick=F,at=at_land, labels=landlab,cex.axis=1.5)
 dev.off()
 
 i = 122
-png(paste(plots_dir,'reconstr_mean','.png',sep=''))
+png(file.path(plots_dir,'reconstr_mean','.png'))
 plot(f0_pcafd$meanfd,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,ylim=c(-4,5))
 lines(f0reg_fd[i],lwd=2, lty=2)
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
@@ -625,7 +625,7 @@ dev.off()
 
 
 
-png(paste(plots_dir,'reconstr_mean_PC1','.png',sep=''))
+png(file.path(plots_dir,'reconstr_mean_PC1','.png'))
 plot(f0_pcafd$meanfd + f0_pcafd$scores[i,1] * f0_pcafd$harmonics[1] ,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,ylim=c(-4,5))
 lines(f0reg_fd[i],lwd=2, lty=2)
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
@@ -634,7 +634,7 @@ legend('topleft',legend=c('original','reconstruction'),lty=c(2,1),lwd=c(2,3))
 dev.off()
 
 
-png(paste(plots_dir,'reconstr_mean_PC1_PC2','.png',sep=''))
+png(file.path(plots_dir,'reconstr_mean_PC1_PC2','.png'))
 plot(f0_pcafd$meanfd + f0_pcafd$scores[i,1] * f0_pcafd$harmonics[1] + f0_pcafd$scores[i,2] * f0_pcafd$harmonics[2],xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='black',lwd=3,ylim=c(-4,5))
 lines(f0reg_fd[i],lwd=2, lty=2)
 abline(v=reg$land[2],lty=2,col='black',lwd=1)
@@ -650,7 +650,7 @@ dev.off()
 # display raw data
 
 # F1
-png(paste(plots_dir,'F1_raw.png',sep=''))
+png(file.path(plots_dir,'F1_raw.png'))
 i=1
 plot(vowel_time0[[i]],F1bark_list[[i]],type = 'n',xlim=c(0,200),ylim=c(-4,4),xlab='time (ms)',ylab='F1 (norm. barks)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
@@ -661,7 +661,7 @@ dev.off()
 
 
 # F2
-png(paste(plots_dir,'F2_raw.png',sep=''))
+png(file.path(plots_dir,'F2_raw.png'))
 i=1
 plot(vowel_time0[[i]],F2bark_list[[i]],type = 'n',xlim=c(0,200),ylim=c(-4,4),xlab='time (ms)',ylab='F2 (norm. barks)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
@@ -695,7 +695,7 @@ F12_fd = fd(coef=F12_coefs, basisobj=basis_F12)
 
 
 # plot the curves
-png(paste(plots_dir,'F1_lin.png',sep=''))
+png(file.path(plots_dir,'F1_lin.png'))
 plot(c(0,mean_dur_F1),c(-4,4),type='n',xlab='time (ms)',ylab='F1 (norm. barks)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
      lines(F12_fd[i,1],col = color[[DH_data$class[i]]], lty=lty[[DH_data$class[i]]], lwd=lwd[[DH_data$class[i]]])
@@ -703,7 +703,7 @@ for (i in (1:n_items)[subsamp]) {
 legend('topleft',legend=unlist(name),col=unlist(color),lwd=unlist(lwd),lty=unlist(lty),cex=1.5)
 dev.off()
 
-png(paste(plots_dir,'F2_lin.png',sep=''))
+png(file.path(plots_dir,'F2_lin.png'))
 plot(c(0,mean_dur_F1),c(-4,4),type='n',xlab='time (ms)',ylab='F2 (norm. barks)',main = '',las=1,cex.axis=1.5,cex.lab=1.5)
 for (i in (1:n_items)[subsamp]) {
      lines(F12_fd[i,2],col = color[[DH_data$class[i]]], lty=lty[[DH_data$class[i]]], lwd=lwd[[DH_data$class[i]]])
@@ -727,7 +727,7 @@ F12_pcafd <- pca.fd(y_fd, nharm=3, pcafdPar) # first three PCs
 plot.pca.fd.corr(F12_pcafd,xlab = 'norm. time',ylab='norm. barks',land = NULL ,nx=40,plots_dir = plots_dir, basename = 'PCA_F12_',height=480)
 
 # plot PC scores grouped by class
-png(paste(plots_dir,'PCscatter_F12.png',sep=''))
+png(file.path(plots_dir,'PCscatter_F12.png'))
 xyplot(F12_pcafd$scores[,2] ~  F12_pcafd$scores[,1] , cex=1.5,
 xlab = list(label=expression(s[1]),cex=2), ylab= list(label=expression(s[2]),cex=2), 
  groups= DH_data$class,
@@ -740,7 +740,7 @@ dev.off()
 
 # PC scores by class and speaker
 # see http://tolstoy.newcastle.edu.au/R/e2/help/07/09/24852.html for the use of panel 
-png(paste(plots_dir,'PCscatter_F12_speaker.png',sep=''))
+png(file.path(plots_dir,'PCscatter_F12_speaker.png'))
 xyp = xyplot(F12_pcafd$scores[,2] ~  F12_pcafd$scores[,1] | DH_data$spk , groups= DH_data$class,
 xlab = list(label=expression(s[1]),cex=1.5), ylab= list(label=expression(s[2]),cex=1.5),cex=1,
 	col = sapply(levels(DH_data$class), function(x) color[[x]],USE.NAMES = FALSE),
@@ -765,7 +765,7 @@ dev.off()
 # boxplots for PC scores 
 # (change s1 and s2 accordingly)
 
-png(paste(plots_dir,'s2_F12_spk_box.png',sep=''))
+png(file.path(plots_dir,'s2_F12_spk_box.png'))
 bwp = bwplot(  F12_pcafd$scores[,2] ~ DH_data$class | DH_data$spk, ylab = expression(s[2]))
 update	(bwp, par.settings=list(
 	        par.xlab.text = list(cex=1.3),
@@ -794,8 +794,8 @@ for (i in 1:nrow(table_plot_F12)) {
      curves_F12[,i] = eval.fd(t_F12,fd(coefs,basis_F12))
 }
 
-png(paste(plots_dir,'F12_mean.png',sep=''))
-#png(paste(plots_dir,'F12_lm_F12_s1.png',sep=''))
+png(file.path(plots_dir,'F12_mean.png'))
+#png(file.path(plots_dir,'F12_lm_F12_s1.png'))
 xyp =	xyplot(
 	ts(data=curves_F12,start=t_F12[1],deltat=t_F12[2]-t_F12[1]),
 	screens=with( table_plot_F12, paste('F',F12,sep='')),
@@ -851,7 +851,7 @@ for (i in 1:nrow(table_plot_F12)) {
      curves_F12[,i] = eval.fd(t_F12,fd(coefs,basis_F12))
 }
 
-png(paste(plots_dir,'s2_F12_mean_spk.png',sep=''))
+png(file.path(plots_dir,'s2_F12_mean_spk.png'))
 xyp =	xyplot(
 	ts(data=curves_F12,start=t_F12[1],deltat=t_F12[2]-t_F12[1]),
 	screens=with( table_plot_F12, paste(spk,', F',F12,sep='')),
@@ -890,14 +890,14 @@ DH_data_FDA$F12_s1 = F12_pcafd$scores[,1]
 DH_data_FDA$F12_s2 = F12_pcafd$scores[,2]
 
 # save a richer table with metadata and FDA-based features
-write.csv(DH_data_FDA,file=paste(data_dir,'DH_data_FDA.csv',sep=''),row.names =FALSE)
+write.csv(DH_data_FDA,file=file.path(data_dir,'DH_data_FDA.csv'),row.names =FALSE)
 
 ################## Analysis of duration ########################
 
 ######## Some exploratory plots
 
 
-png(paste(plots_dir,'vdur_box.png',sep=''))
+png(file.path(plots_dir,'vdur_box.png'))
 bwp = bwplot(  DH_data$vdur ~ DH_data$class, ylab = 'vowel seq duration (ms)')
 update	(bwp, par.settings=list(
 	        par.xlab.text = list(cex=1.3),
@@ -908,7 +908,7 @@ update	(bwp, par.settings=list(
 dev.off()
 
 
-png(paste(plots_dir,'vdur_spk_box.png',sep=''))
+png(file.path(plots_dir,'vdur_spk_box.png'))
 bwp = bwplot(  DH_data$vdur ~ DH_data$class | DH_data$spk, ylab = 'vowel seq duration (ms)')
 update	(bwp, par.settings=list(
 	        par.xlab.text = list(cex=1.3),
@@ -921,4 +921,4 @@ update	(bwp, par.settings=list(
 
 dev.off()
 
-save.image(paste(scripts_dir,'FDA.RImage',sep=''))
+save.image(file.path(scripts_dir,'FDA.RImage'))
